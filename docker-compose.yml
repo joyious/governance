@@ -1,0 +1,39 @@
+version: "3.3"
+
+volumes:
+  mongo_data:
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+        - ./backend/app:/app
+    ports:
+      - "8000:8000"
+      - "8888:8888"
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "user"
+      MONGO_INITDB_ROOT_PASSWORD: "abc@123"
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: frontend.dockerfile
+      args:
+        FRONTEND_ENV: dev
+    ports:
+        - "80:80"

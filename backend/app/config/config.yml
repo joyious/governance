@@ -1,0 +1,14 @@
+
+
+fastapi:
+    debug: true
+
+databases:
+    default:
+        ENGINE: 'mongodb'
+        DRIVER: 'motor'
+        NAME: 'test'
+        USER: 'user'
+        PASSWORD: 'abc@123'
+        HOST: 'mongo'
+        PORT: 27017
