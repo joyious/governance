@@ -1,4 +1,4 @@
-pragma solidity ^0.5.4;
+pragma solidity >=0.4.21 <0.7.0;
 
 
 interface IERC20 {
@@ -6,7 +6,7 @@ interface IERC20 {
 }
 
 
-contract Voter {
+contract Voting {
     IERC20 public token;
 
     uint256 public startTime;
@@ -58,11 +58,14 @@ contract Voter {
         require(now > startTime, "Voting has not Started yet");
         require(now < endTime, "Voting has ended");
         require(_option - 1 < optionCount, "Please choose a valid option");
-        require(voteRecord[msg.sender] == 0, "You have voted already");
-        require(token.balanceOf(msg.sender) != 0, "You have no toke avaliable");
+        //require(voteRecord[msg.sender] == 0, "You have voted already");
+        require(token.balanceOf(msg.sender) != 0, "You have no toke available");
+
+        if (voteRecord[msg.sender] == 0) {
+            addressVoted.push(msg.sender);
+        }
 
         voteRecord[msg.sender] = _option;
-        addressVoted.push(msg.sender);
 
         status = getLiveStatus();
     }
@@ -75,5 +78,18 @@ contract Voter {
         } else {
             return status;
         }
+    }
+
+    function getVoteRecord(address addr) external view returns (uint256) {
+        return voteRecord[addr];
+    }
+
+    // !!! REMOVE BELOW FUNCTIONS WHEN DEPLOYING OFFICIAL CONTRACT
+    function setEndTime(uint256 _end) external {
+        endTime = _end;
+    }
+
+    function setStartTime(uint256 _start) external {
+        startTime = _start;
     }
 }
