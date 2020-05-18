@@ -10,3 +10,4 @@ RUN pip install -r requirements.txt
 
 #Install jupyterlab
 RUN pip install jupyterlab
+RUN jupyter notebook --generate-config

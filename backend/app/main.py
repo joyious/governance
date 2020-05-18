@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from pydantic import BaseModel
+from bson.objectid import ObjectId
 
 from config import config
+
 
 app = FastAPI()
 
@@ -42,6 +44,18 @@ async def get_all_votes(status: Optional[str] = None, limit: int = 10, skip: int
     votes = await votes_cursor.to_list(length=limit)
 
     return list(map(fix_id, votes))
+
+
+@app.get("/votes/{vote_id}")
+async def get_a_vote(vote_id: str, q: str = None):
+    """[summary]
+    Gets vote for one specified id .
+    [description]
+    Endpoint for one vote.
+    """
+    vote = await config.DB.votes.find_one({"_id": ObjectId(vote_id)})
+    vote = fix_id(vote)
+    return vote
 
 
 @app.on_event("startup")

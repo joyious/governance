@@ -30,6 +30,10 @@ docker-compose down
 
 ### Backend debugging
 
+Fastapi provides pretty good api documentation, which is available at:
+
+http://127.0.0.1:8000/docs
+
 Start debugging backend using jupyter:
 ```
 docker-compose exec backend jupyter lab --ip=0.0.0.0 --allow-root --NotebookApp.custom_display_url=http://127.0.0.1:8888
