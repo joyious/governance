@@ -9,7 +9,8 @@ contract("Voting test", async accounts => {
         token = await TestToken.deployed();
 
         let now = Math.floor(Date.now() / 1000);
-        voting = await Voting.new(token.address, now - 100, now + 300, 2);
+        let totalSupply = await token.totalSupply();
+        voting = await Voting.new(token.address, now - 100, now + 300, 2, totalSupply / 5, totalSupply / 2);
     });
 
     it("should put 1000000 TestToken in the first account", async () => {
@@ -88,7 +89,7 @@ contract("Voting test", async accounts => {
     });
 
     it("transfer some test token and check the vote result again", async () => {
-        await token.transfer(accounts[1], 20000, { from: accounts[0] });
+        await token.transfer(accounts[1], 500000, { from: accounts[0] });
         await voting.vote(1, { from: accounts[0] });
         await voting.vote(2, { from: accounts[1] });
 
@@ -129,8 +130,8 @@ contract("Voting test", async accounts => {
     });
 
     it("Wait for the vote to end", async () => {
-        await token.transfer(accounts[1], 20000, { from: accounts[0] });
-        await token.transfer(accounts[2], 50000, { from: accounts[0] });
+        // Account 1 should have some balance already
+        await token.transfer(accounts[2], 50000, { from: accounts[1] });
 
         await voting.vote(1, { from: accounts[0] });
         await voting.vote(2, { from: accounts[1] });
@@ -151,6 +152,33 @@ contract("Voting test", async accounts => {
 
         assert.equal(s[0].toNumber(), balance0.toNumber());
         assert.equal(s[1].toNumber(), balance1.toNumber() + balance2.toNumber());
+    });
+
+    it("Check validation and finalizaion", async () => {
+        await token.transfer(accounts[0], 400000, { from: accounts[1] });
+        await token.transfer(accounts[3], 100, { from: accounts[1] });
+
+        // Account 3 has only 100 which has not reach the threshold
+        await voting.vote(1, { from: accounts[3] });
+        let isValid = await voting.isValid();
+        assert.equal(isValid.valueOf(), false);
+
+        // Account 0 has enough token to finalize the voting
+        await voting.vote(2, { from: accounts[0] });
+        isValid = await voting.isValid();
+        let isAlive = await voting.isAlive();
+        assert.equal(isAlive.valueOf(), false);
+        assert.equal(isValid.valueOf(), true);
+
+        // Should not be able to vote as it has been finalized
+        try {
+            await voting.vote(1, { from: accounts[0] });
+            assert.fail();
+        } catch (err) {
+            console.log(err.message);
+            assert.ok(/revert/.test(err.message));
+        }
+
     });
 
 
