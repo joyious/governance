@@ -128,6 +128,30 @@ contract("Voting test", async accounts => {
         assert.equal(s[1].toNumber(), balance0.toNumber());
     });
 
+    it("Wait for the vote to end", async () => {
+        await token.transfer(accounts[1], 20000, { from: accounts[0] });
+        await token.transfer(accounts[2], 50000, { from: accounts[0] });
+
+        await voting.vote(1, { from: accounts[0] });
+        await voting.vote(2, { from: accounts[1] });
+        await voting.vote(2, { from: accounts[2] });
+
+        // End the vote
+        let now = Math.floor(Date.now() / 1000);
+        voting.setEndTime(now - 10);
+
+        let balance0 = await token.balanceOf.call(accounts[0]);
+        let balance1 = await token.balanceOf.call(accounts[1]);
+        let balance2 = await token.balanceOf.call(accounts[2]);
+
+        // Make some transfer after vote ends
+        await token.transfer(accounts[1], 20000, { from: accounts[0] });
+
+        let s = await voting.getTotalVote();
+
+        assert.equal(s[0].toNumber(), balance0.toNumber());
+        assert.equal(s[1].toNumber(), balance1.toNumber() + balance2.toNumber());
+    });
 
 
 });

@@ -1,2 +1,4 @@
 contract/build
 contract/node_modules
+contract/coverage
+contract/coverage.json
