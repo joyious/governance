@@ -67,7 +67,7 @@ contract Voting {
     }
 
     function isAlive() public view returns (bool) {
-        return (now < endTime) && !isFinalized;
+        return (now > startTime) && (now < endTime) && !isFinalized;
     }
 
     function checkForFinalization() private {
