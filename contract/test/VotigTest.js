@@ -154,19 +154,30 @@ contract("Voting test", async accounts => {
         assert.equal(s[1].toNumber(), balance1.toNumber() + balance2.toNumber());
     });
 
-    it("Check validation and finalizaion", async () => {
-        await token.transfer(accounts[0], 400000, { from: accounts[1] });
-        await token.transfer(accounts[3], 100, { from: accounts[1] });
-
+    it("Check validation and finalization", async () => {
         // Account 3 has only 100 which has not reach the threshold
+        await token.transfer(accounts[3], 100, { from: accounts[1] });
         await voting.vote(1, { from: accounts[3] });
         let isValid = await voting.isValid();
         assert.equal(isValid.valueOf(), false);
 
-        // Account 0 has enough token to finalize the voting
-        await voting.vote(2, { from: accounts[0] });
+        // Account 2 should have enough token to reach the threshold
+        await token.transfer(accounts[2], 200000, { from: accounts[1] });
+        await voting.vote(2, { from: accounts[2] });
         isValid = await voting.isValid();
+        assert.equal(isValid.valueOf(), true);
+
+        // Now transfer some token back to make it invalid
+        await token.transfer(accounts[1], 200000, { from: accounts[2] });
+        await voting.vote(2, { from: accounts[2] });
+        isValid = await voting.isValid();
+        assert.equal(isValid.valueOf(), false);
+
+        // Account 0 has enough token to finalize the voting
+        await token.transfer(accounts[0], 400000, { from: accounts[1] });
+        await voting.vote(2, { from: accounts[0] });
         let isAlive = await voting.isAlive();
+        isValid = await voting.isValid();
         assert.equal(isAlive.valueOf(), false);
         assert.equal(isValid.valueOf(), true);
 

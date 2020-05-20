@@ -86,13 +86,17 @@ contract Voting {
     function checkForValidation() private {
         uint256 len = status.length;
         uint256 i;
+        uint256 total = 0;
 
         for (i = 0; i < len; ++i) {
-            if (status[i] > threshold) {
+            total += status[i];
+            if (total > threshold) {
                 isValid = true;
                 return;
             }
         }
+
+        isValid = false;
     }
 
     function vote(uint256 _option) external {
