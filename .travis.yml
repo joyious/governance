@@ -10,7 +10,5 @@ before_install:
 install:
   - cd contract
   - npm install -g truffle
-  - npm install -g coveralls
-  - npm install
 script:
-  - npm run coverage && cat coverage/lcov.info | coveralls
+  - truffle run coverage
