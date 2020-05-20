@@ -1,7 +1,7 @@
 sudo: required
 language: node_js
 node_js:
-  - "8"
+  - "12"
 services:
   - docker
 before_install:
@@ -11,4 +11,4 @@ install:
   - cd contract
   - npm install -g truffle
 script:
-  - truffle run coverage
+  - truffle test
